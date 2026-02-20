@@ -1,6 +1,7 @@
 ﻿# dev-pc-cleaner
 
-![Go](https://img.shields.io/badge/Go-1.20%2B-00ADD8?logo=go&logoColor=white)
+![Build](https://img.shields.io/badge/build-manual-555555)
+![Platform](https://img.shields.io/badge/platform-windows%2BWSL-0078D6?logo=windows&logoColor=white)
 
 [English](README.md) | [한국어](README_ko.md)
 
@@ -139,3 +140,9 @@ Options:
 - `-Paths`: Explicit VHDX paths to optimize
 - `-ShutdownOnly`: Only run `wsl --shutdown`
 - The script auto-detects WSL VHDX paths from the current user's registry (no hardcoded paths).
+
+## License
+No license at this time.
+
+## Versioning
+No versioning planned at this time.

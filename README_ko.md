@@ -1,6 +1,7 @@
 ﻿# dev-pc-cleaner
 
-![Go](https://img.shields.io/badge/Go-1.20%2B-00ADD8?logo=go&logoColor=white)
+![Build](https://img.shields.io/badge/build-manual-555555)
+![Platform](https://img.shields.io/badge/platform-windows%2BWSL-0078D6?logo=windows&logoColor=white)
 
 [English](README.md) | [한국어](README_ko.md)
 
@@ -139,3 +140,9 @@ powershell -ExecutionPolicy Bypass -File .\scripts\shrink_wsl.ps1 -Force
 - `-Paths`: 최적화할 VHDX 경로 직접 지정
 - `-ShutdownOnly`: `wsl --shutdown`만 수행
 - 스크립트는 사용자 레지스트리에서 VHDX 경로를 자동 탐색합니다.
+
+## 라이센스
+현재는 별도 라이센스가 없습니다.
+
+## 버저닝
+현재 버저닝 계획은 없습니다.
