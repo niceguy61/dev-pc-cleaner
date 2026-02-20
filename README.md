@@ -1,4 +1,6 @@
-﻿# windows_cleaner
+﻿# dev-pc-cleaner
+
+![Go](https://img.shields.io/badge/Go-1.20%2B-00ADD8?logo=go&logoColor=white)
 
 Developer Windows cleaner focused on language/tool caches, logs, and Docker, with a CLI-first workflow.
 
@@ -37,7 +39,7 @@ go run . clean -apply
 - `-apply`: Apply destructive changes
 - `-allow-system-delete`: Allow deletion of system cache paths (requires `-apply`)
 - `-docker-prune`: Run `docker system prune` during clean (default: true)
-- `-docker-all`: Prune all unused images (requires `-docker-prune`)
+- `-docker-all`: Prune all unused images (requires `-docker-prune)`
 - `-docker-volumes`: Prune unused volumes (requires `-docker-prune)`
 
 ## Project Scan Options
@@ -58,6 +60,38 @@ Review input supports:
 - `gt:500mb`
 - `cat:web`
 - `project:<path>`
+
+## Example Output
+
+```text
+Language Detection
++-------------------+------------+-----------+------------------------------------------------------------+----------------------+
+| Language          | Category   | Status    | Version                                                    | Command              |
++-------------------+------------+-----------+------------------------------------------------------------+----------------------+
+| Go                | Systems    | Installed | go version go1.25.6 windows/amd64                          | go version           |
+| Java              | General    | Installed | openjdk version "21.0.7" 2025-04-15 LTS                    | java -version        |
+| JavaScript        | Web        | Installed | v22.21.1                                                   | node -v              |
+| Python            | General    | Installed | Python 3.12.10                                             | python --version     |
+| TypeScript        | Web        | Installed |                                                            | tsc -v               |
++-------------------+------------+-----------+------------------------------------------------------------+----------------------+
+
+Cache Scan
++--------------------------------+----------+----------+---------+----------+-------+------------------------------------------+
+| Item                           | Category | Priority | Status  | Size     | Files | Path                                     |
++--------------------------------+----------+----------+---------+----------+-------+------------------------------------------+
+| go build cache                 | Go       | Low      | OK      | 40.4 MB  | 561   | C:\Users\sunny\AppData\Local\go-build    |
+| user temp                      | Logs     | Low      | Partial | 144.9 MB | 245   | C:\Users\sunny\AppData\Local\Temp        |
+| software distribution download | System   | Medium   | OK      | 972.5 MB | 33573 | C:\WINDOWS\SoftwareDistribution\Download |
+| recycle bin                    | System   | Low      | Partial | 3.1 KB   | 20    | D:\$Recycle.Bin                          |
++--------------------------------+----------+----------+---------+----------+-------+------------------------------------------+
+
+Summary
++-------+-------+--------+
+| Items | Files | Size   |
++-------+-------+--------+
+| 10    | 34834 | 1.2 GB |
++-------+-------+--------+
+```
 
 ## Config
 - `-config`: Load config from file
