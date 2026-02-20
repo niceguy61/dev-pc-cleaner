@@ -1,0 +1,19 @@
+﻿{
+  "timeout": "5s",
+  "showMissing": false,
+  "includeSystem": true,
+  "apply": false,
+  "dockerPrune": true,
+  "dockerAll": false,
+  "dockerVolumes": false,
+  "allowSystemDelete": false,
+  "minMB": 500,
+  "minFiles": 0,
+  "projectRoot": "D:\\repo",
+  "projectDepth": 4,
+  "projectClean": false,
+  "projectReview": true,
+  "projectExclude": "D:\\repo\\.git",
+  "projectNoDefaultExclude": false,
+  "output": "json"
+}

@@ -1,0 +1,18 @@
+﻿# Build
+/bin/
+/dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+.vs/
+
+# Go
+/vendor/
