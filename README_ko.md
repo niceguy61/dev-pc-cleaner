@@ -4,66 +4,66 @@
 
 [English](README.md) | [한국어](README_ko.md)
 
-Developer Windows cleaner focused on language/tool caches, logs, and Docker, with a CLI-first workflow.
+개발자용 Windows 클리너. 언어/도구 캐시, 로그, Docker 정리를 CLI 중심으로 제공합니다.
 
-## Requirements
+## 요구 사항
 
-- Go 1.20+ installed
+- Go 1.20+ 설치
   - Windows (PowerShell):
     - `winget install GoLang.Go`
   - Linux (Debian/Ubuntu):
     - `sudo apt-get update && sudo apt-get install -y golang`
 
-## Quick Start
+## 빠른 시작
 
 ```powershell
 go run . scan
 go run . clean -apply
 ```
 
-## Commands
-- `scan`: Detect languages + scan caches (default)
-- `detect`: Detect installed languages only
-- `clean`: Remove cache locations (dry-run unless `-apply`)
+## 명령어
+- `scan`: 언어 감지 + 캐시 스캔 (기본)
+- `detect`: 설치된 언어만 감지
+- `clean`: 캐시 삭제 (기본은 dry-run, `-apply` 필요)
 
-## Common Options
-- `-no-color`: Disable ANSI colors
-- `-timeout`: Per-command timeout (e.g. `2s`, `1500ms`)
+## 공통 옵션
+- `-no-color`: ANSI 색상 끄기
+- `-timeout`: 커맨드 타임아웃 (예: `2s`, `1500ms`)
 - `-output`: `table|json|csv`
 
-## Cache Scan Options
-- `-show-missing`: Include missing cache paths in output
-- `-include-system`: Include system-level cache paths (default: true)
-- `-min-mb`: Filter items smaller than this size (MB)
-- `-min-files`: Filter items with fewer files than this count
+## 캐시 스캔 옵션
+- `-show-missing`: 존재하지 않는 경로도 표시
+- `-include-system`: 시스템 캐시 포함 (기본: true)
+- `-min-mb`: 이 크기(MB)보다 작은 항목 숨김
+- `-min-files`: 이 파일 수보다 작은 항목 숨김
 
-## Clean Options
-- `-apply`: Apply destructive changes
-- `-allow-system-delete`: Allow deletion of system cache paths (requires `-apply`)
-- `-docker-prune`: Run `docker system prune` during clean (default: true)
-- `-docker-all`: Prune all unused images (requires `-docker-prune)`
-- `-docker-volumes`: Prune unused volumes (requires `-docker-prune)`
+## 정리 옵션
+- `-apply`: 실제 삭제 수행
+- `-allow-system-delete`: 시스템 캐시 삭제 허용 (`-apply` 필요)
+- `-docker-prune`: `docker system prune` 실행 (기본: true)
+- `-docker-all`: 미사용 이미지 모두 정리 (`-docker-prune` 필요)
+- `-docker-volumes`: 미사용 볼륨 정리 (`-docker-prune` 필요)
 
-## Project Scan Options
-- `-project-root`: Scan project caches under this root
-- `-project-depth`: Max directory depth for project scan (`-1` = unlimited)
-- `-project-clean`: Include project cache clean
-- `-project-review`: Review and select project items before cleaning
-- `-project-exclude`: Comma-separated exclude paths for project scan
-- `-project-no-default-exclude`: Disable default excludes for project scan
-- `-recycle-bin-only`: Only scan/clean recycle bin (system scope)
+## 프로젝트 스캔 옵션
+- `-project-root`: 프로젝트 캐시 스캔 루트
+- `-project-depth`: 최대 깊이 (`-1` = 제한 없음)
+- `-project-clean`: 프로젝트 캐시 삭제 포함
+- `-project-review`: 삭제 전 선택(리뷰) 모드
+- `-project-exclude`: 제외 경로(쉼표 구분)
+- `-project-no-default-exclude`: 기본 제외 목록 비활성화
+- `-recycle-bin-only`: 휴지통만 스캔/정리 (시스템 범위)
 
-Table formatting:
-- `-cmd-max`: Max width for command column (0 = no limit)
-- `-path-max`: Max width for path column (0 = no limit)
+테이블 출력:
+- `-cmd-max`: Command 컬럼 최대 폭 (0 = 제한 없음)
+- `-path-max`: Path 컬럼 최대 폭 (0 = 제한 없음)
 
-Review input supports:
+리뷰 입력 지원:
 - `all`, `none`
 - `gt:500mb`
 - `cat:web`
 - `project:<path>`
 
-## Example Output
+## 출력 예시
 
 ```text
 Language Detection
@@ -95,25 +95,25 @@ Summary
 +-------+-------+--------+
 ```
 
-## Config
-- `-config`: Load config from file
-- `-save-config`: Save config to file
+## 설정
+- `-config`: 설정 파일 로드
+- `-save-config`: 설정 파일 저장
 
-Example:
+예시:
 ```powershell
 go run . scan -project-root D:\repo -project-depth 6 -min-mb 200 -save-config D:\cleaner.json
 go run . clean -config D:\cleaner.json -apply -project-clean -project-review
 ```
 
-## Output (JSON)
-`scan` JSON contains:
+## JSON 출력
+`scan` JSON 포함 항목:
 - `languages`
 - `items`
 - `summary`
 - `project`
 - `projectSummary`
 
-`clean` JSON contains:
+`clean` JSON 포함 항목:
 - `languages`
 - `items`
 - `summary`
@@ -123,9 +123,9 @@ go run . clean -config D:\cleaner.json -apply -project-clean -project-review
 - `projectSummary`
 - `projectClean`
 
-## WSL Disk Shrink
+## WSL 디스크 축소
 
-After `docker system prune`, WSL/Docker disk usage may not shrink automatically. Use:
+`docker system prune` 이후에도 디스크 용량이 자동으로 줄지 않을 수 있습니다. 아래 스크립트를 사용하세요.
 
 ```powershell
 # interactive
@@ -135,7 +135,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\shrink_wsl.ps1
 powershell -ExecutionPolicy Bypass -File .\scripts\shrink_wsl.ps1 -Force
 ```
 
-Options:
-- `-Paths`: Explicit VHDX paths to optimize
-- `-ShutdownOnly`: Only run `wsl --shutdown`
-- The script auto-detects WSL VHDX paths from the current user's registry (no hardcoded paths).
+옵션:
+- `-Paths`: 최적화할 VHDX 경로 직접 지정
+- `-ShutdownOnly`: `wsl --shutdown`만 수행
+- 스크립트는 사용자 레지스트리에서 VHDX 경로를 자동 탐색합니다.
