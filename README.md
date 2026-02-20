@@ -7,6 +7,9 @@
 
 Developer Windows cleaner focused on language/tool caches, logs, and Docker, with a CLI-first workflow.
 
+## Why
+After 2+ years without reinstalling Windows, I found old dev libraries, huge Docker logs, and WSL disk usage piling up. I built this to clean those reliably and to help others with the same problem.
+
 ## Requirements
 
 - Go 1.20+ installed
