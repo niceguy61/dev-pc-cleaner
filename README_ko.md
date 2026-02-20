@@ -2,8 +2,8 @@
 
 ![Build](https://img.shields.io/badge/build-manual-555555)
 ![Platform](https://img.shields.io/badge/platform-windows%2BWSL-0078D6?logo=windows&logoColor=white)
-
-[English](README.md) | [한국어](README_ko.md)
+[![English](https://img.shields.io/badge/English-README-222222)](README.md)
+[![한국어](https://img.shields.io/badge/한국어-README_ko-222222)](README_ko.md)
 
 개발자용 Windows 클리너. 언어/도구 캐시, 로그, Docker 정리를 CLI 중심으로 제공합니다.
 

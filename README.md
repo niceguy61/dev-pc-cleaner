@@ -2,8 +2,8 @@
 
 ![Build](https://img.shields.io/badge/build-manual-555555)
 ![Platform](https://img.shields.io/badge/platform-windows%2BWSL-0078D6?logo=windows&logoColor=white)
-
-[English](README.md) | [한국어](README_ko.md)
+[![English](https://img.shields.io/badge/English-README-222222)](README.md)
+[![한국어](https://img.shields.io/badge/한국어-README_ko-222222)](README_ko.md)
 
 Developer Windows cleaner focused on language/tool caches, logs, and Docker, with a CLI-first workflow.
 
