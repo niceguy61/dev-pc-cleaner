@@ -79,8 +79,8 @@ Cache Scan
 +--------------------------------+----------+----------+---------+----------+-------+------------------------------------------+
 | Item                           | Category | Priority | Status  | Size     | Files | Path                                     |
 +--------------------------------+----------+----------+---------+----------+-------+------------------------------------------+
-| go build cache                 | Go       | Low      | OK      | 40.4 MB  | 561   | C:\Users\sunny\AppData\Local\go-build    |
-| user temp                      | Logs     | Low      | Partial | 144.9 MB | 245   | C:\Users\sunny\AppData\Local\Temp        |
+| go build cache                 | Go       | Low      | OK      | 40.4 MB  | 561   | C:\Users\USER\AppData\Local\go-build     |
+| user temp                      | Logs     | Low      | Partial | 144.9 MB | 245   | C:\Users\USER\AppData\Local\Temp         |
 | software distribution download | System   | Medium   | OK      | 972.5 MB | 33573 | C:\WINDOWS\SoftwareDistribution\Download |
 | recycle bin                    | System   | Low      | Partial | 3.1 KB   | 20    | D:\$Recycle.Bin                          |
 +--------------------------------+----------+----------+---------+----------+-------+------------------------------------------+
