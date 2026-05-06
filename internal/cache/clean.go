@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -8,9 +9,10 @@ import (
 )
 
 type CleanResult struct {
-	Item   Item
-	Status string
-	Error  string
+	Item         Item
+	Status       string
+	Error        string
+	DeletedBytes int64
 }
 
 func Clean(items []Item, apply bool, allowSystemDelete bool) []CleanResult {
@@ -35,45 +37,101 @@ func Clean(items []Item, apply bool, allowSystemDelete bool) []CleanResult {
 			continue
 		}
 
-		err := removePath(item.Path, item.System)
+		deletedBytes, err := removePath(item.Path, item.System)
 		if err != nil {
+			if deletedBytes > 0 {
+				results = append(results, CleanResult{Item: item, Status: "partial", Error: err.Error(), DeletedBytes: deletedBytes})
+				continue
+			}
 			results = append(results, CleanResult{Item: item, Status: "error", Error: err.Error()})
 			continue
 		}
-		results = append(results, CleanResult{Item: item, Status: "deleted"})
+		results = append(results, CleanResult{Item: item, Status: "deleted", DeletedBytes: deletedBytes})
 	}
 
 	return results
 }
 
-func removePath(path string, system bool) error {
+func removePath(path string, system bool) (int64, error) {
 	if path == "" {
-		return fmt.Errorf("empty path")
+		return 0, fmt.Errorf("empty path")
 	}
 	if !isSafePath(path, system) {
-		return fmt.Errorf("protected path")
+		return 0, fmt.Errorf("protected path")
 	}
 
 	info, err := os.Lstat(path)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	if info.IsDir() {
-		return os.RemoveAll(path)
+		return removeDirContents(path)
 	}
 
 	if err := os.Remove(path); err != nil {
 		// Some tools create read-only files
 		if chmodErr := os.Chmod(path, 0o600); chmodErr == nil {
-			return os.Remove(path)
+			if err := os.Remove(path); err != nil {
+				return 0, err
+			}
+			return info.Size(), nil
 		}
-		return err
+		return 0, err
 	}
 
 	// Ensure parent empty dirs are not deleted; keep behavior safe.
 	_ = filepath.Clean(path)
-	return nil
+	return info.Size(), nil
+}
+
+func removeDirContents(path string) (int64, error) {
+	entries, err := os.ReadDir(path)
+	if err != nil {
+		return 0, err
+	}
+
+	var deletedBytes int64
+	var removeErrors []error
+	for _, entry := range entries {
+		child := filepath.Join(path, entry.Name())
+		bytes, err := removeAny(child)
+		deletedBytes += bytes
+		if err != nil {
+			removeErrors = append(removeErrors, err)
+		}
+	}
+
+	return deletedBytes, errors.Join(removeErrors...)
+}
+
+func removeAny(path string) (int64, error) {
+	info, err := os.Lstat(path)
+	if err != nil {
+		return 0, err
+	}
+
+	if info.IsDir() {
+		deletedBytes, err := removeDirContents(path)
+		if err != nil {
+			return deletedBytes, err
+		}
+		if err := os.Remove(path); err != nil {
+			return deletedBytes, err
+		}
+		return deletedBytes, nil
+	}
+
+	if err := os.Remove(path); err != nil {
+		if chmodErr := os.Chmod(path, 0o600); chmodErr == nil {
+			if err := os.Remove(path); err != nil {
+				return 0, err
+			}
+			return info.Size(), nil
+		}
+		return 0, err
+	}
+	return info.Size(), nil
 }
 
 func isSafePath(path string, system bool) bool {

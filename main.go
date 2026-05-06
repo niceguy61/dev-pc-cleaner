@@ -14,6 +14,7 @@ import (
 
 	"windows_cleaner/internal/cache"
 	"windows_cleaner/internal/detect"
+	"windows_cleaner/internal/platform"
 	"windows_cleaner/internal/project"
 	"windows_cleaner/internal/registry"
 	"windows_cleaner/internal/ui"
@@ -242,6 +243,7 @@ func runScan(timeout time.Duration, showMissing bool, includeSystem bool, minMB 
 
 func runClean(timeout time.Duration, showMissing bool, includeSystem bool, minMB int64, minFiles int64, apply bool, allowSystemDelete bool, dockerPrune bool, dockerAll bool, dockerVolumes bool, output string, projectRoot string, projectDepth int, projectClean bool, projectReview bool, projectExclude string, projectNoDefault bool, recycleBinOnly bool, cmdMax int, pathMax int) {
 	ctx := context.Background()
+	env := platform.Detect()
 
 	results := detectLanguages(ctx, timeout)
 	if apply && output == "table" {
@@ -262,7 +264,9 @@ func runClean(timeout time.Duration, showMissing bool, includeSystem bool, minMB
 		IncludeSystem: includeSystem,
 		Timeout:       timeout,
 	})
-	cacheRes.Items = append(cacheRes.Items, cache.ScanDocker(ctx, timeout)...)
+	if dockerPrune {
+		cacheRes.Items = append(cacheRes.Items, cache.ScanDocker(ctx, timeout)...)
+	}
 	cacheRes.Items = filterItems(cacheRes.Items, minMB, minFiles)
 	if recycleBinOnly {
 		cacheRes.Items = filterRecycleBin(cacheRes.Items)
@@ -274,7 +278,6 @@ func runClean(timeout time.Duration, showMissing bool, includeSystem bool, minMB
 	sizeByPath := buildSizeMap(cacheRes.Items, projectItems)
 	var estimatePlan int64
 	var estimateSet bool
-	var dockerReclaimed int64
 
 	if output == "json" {
 		cleanResults := cache.Clean(cacheRes.Items, apply, allowSystemDelete && apply)
@@ -335,8 +338,10 @@ func runClean(timeout time.Duration, showMissing bool, includeSystem bool, minMB
 	ui.Println(ui.Bold("Clean Results"))
 	cleanResults := cache.Clean(cacheRes.Items, apply, allowSystemDelete && apply)
 	printCleanTable(cleanResults, output, pathMax)
+	var actualCleaned int64
 	if apply && output == "table" {
 		cleaned := deletedBytes(cleanResults, sizeByPath)
+		actualCleaned += cleaned
 		ui.Println(fmt.Sprintf("Done: about %s cleaned.", humanBytes(cleaned)))
 	}
 
@@ -346,6 +351,7 @@ func runClean(timeout time.Duration, showMissing bool, includeSystem bool, minMB
 		printProjectCleanTable(projectCleanResults, output, pathMax)
 		if apply && output == "table" {
 			cleaned := deletedProjectBytes(projectCleanResults, sizeByPath)
+			actualCleaned += cleaned
 			ui.Println(fmt.Sprintf("Project clean: about %s cleaned.", humanBytes(cleaned)))
 		}
 	}
@@ -359,21 +365,14 @@ func runClean(timeout time.Duration, showMissing bool, includeSystem bool, minMB
 		printCleanTable([]cache.CleanResult{dockerRes}, output, pathMax)
 		if apply && output == "table" {
 			if reclaimed := parseDockerReclaimed(dockerRes); reclaimed > 0 {
-				dockerReclaimed = reclaimed
+				actualCleaned += reclaimed
 				ui.Println(fmt.Sprintf("Docker clean: about %s reclaimed.", humanBytes(reclaimed)))
 			}
 		}
 	}
 
 	if apply && output == "table" && estimateSet {
-		actual := deletedBytes(cleanResults, sizeByPath)
-		if projectClean {
-			actual += deletedProjectBytes(projectCleanResults, sizeByPath)
-		}
-		if dockerReclaimed > 0 {
-			actual += dockerReclaimed
-		}
-		diff := actual - estimatePlan
+		diff := actualCleaned - estimatePlan
 		if diff < 0 {
 			diff = -diff
 		}
@@ -382,10 +381,10 @@ func runClean(timeout time.Duration, showMissing bool, includeSystem bool, minMB
 		}
 	}
 
-	if apply && output == "table" {
+	if apply && output == "table" && actualCleaned > 0 && env.SupportsWindowsWslShrink() {
 		ui.Println("")
 		ui.Println("WSL disk shrink can reduce VHDX file size after cleanup.")
-		ui.Println("Run now? [y/n]")
+		ui.Println("Show shrink instructions? [y/n]")
 		if confirmYesNo() {
 			ui.Println("Run this in Administrator PowerShell:")
 			ui.Println("  wsl --shutdown")
@@ -811,6 +810,8 @@ func printProjectCleanTable(results []project.CleanResult, output string, pathMa
 			status = ui.Yellow("Dry-Run")
 		case "skipped":
 			status = ui.Yellow("Skipped")
+		case "partial":
+			status = ui.Yellow("Partial")
 		case "error":
 			status = ui.Red("Error")
 		}
@@ -902,6 +903,8 @@ func printCleanTable(results []cache.CleanResult, output string, pathMax int) {
 			status = ui.Yellow("Missing")
 		case "skipped":
 			status = ui.Yellow("Skipped")
+		case "partial":
+			status = ui.Yellow("Partial")
 		case "error":
 			status = ui.Red("Error")
 		}
@@ -1072,6 +1075,10 @@ func buildSizeMap(cacheItems []cache.Item, projectItems []project.Item) map[stri
 func deletedBytes(results []cache.CleanResult, sizeByPath map[string]int64) int64 {
 	var total int64
 	for _, r := range results {
+		if r.DeletedBytes > 0 {
+			total += r.DeletedBytes
+			continue
+		}
 		if r.Status == "deleted" {
 			if sz, ok := sizeByPath[strings.ToLower(r.Item.Path)]; ok {
 				total += sz

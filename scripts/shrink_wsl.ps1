@@ -13,15 +13,41 @@ function Get-WslBasePaths {
       [pscustomobject]@{
         Name = $p.DistributionName
         BasePath = $p.BasePath
+        VhdFileName = $p.VhdFileName
       }
     }
   }
 }
 
+function Normalize-WindowsPath {
+  param([string]$Path)
+  if ([string]::IsNullOrWhiteSpace($Path)) { return $null }
+  if ($Path.StartsWith("\\?\")) { return $Path.Substring(4) }
+  return $Path
+}
+
 function Resolve-Ext4Vhdx {
-  param([string]$BasePath)
-  $path = Join-Path $BasePath "ext4.vhdx"
-  if (Test-Path $path) { return $path }
+  param(
+    [string]$BasePath,
+    [string]$VhdFileName
+  )
+
+  $base = Normalize-WindowsPath $BasePath
+  if ([string]::IsNullOrWhiteSpace($base)) { return $null }
+
+  $fileName = $VhdFileName
+  if ([string]::IsNullOrWhiteSpace($fileName)) {
+    $fileName = "ext4.vhdx"
+  }
+
+  $path = [System.IO.Path]::Combine($base, $fileName)
+  if (Test-Path -LiteralPath $path) { return $path }
+
+  if (Test-Path -LiteralPath $base) {
+    $candidate = Get-ChildItem -LiteralPath $base -Filter "*.vhdx" -File -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($null -ne $candidate) { return $candidate.FullName }
+  }
+
   return $null
 }
 
@@ -38,7 +64,7 @@ if ($Paths -and $Paths.Count -gt 0) {
 } else {
   $entries = Get-WslBasePaths
   foreach ($e in $entries) {
-    $vhdx = Resolve-Ext4Vhdx $e.BasePath
+    $vhdx = Resolve-Ext4Vhdx -BasePath $e.BasePath -VhdFileName $e.VhdFileName
     if ($vhdx) {
       $targets += $vhdx
     }

@@ -22,7 +22,8 @@ After 2+ years without reinstalling Windows, I found old dev libraries, huge Doc
 
 ```powershell
 go run . scan
-go run . clean -apply
+go build -o dev-pc-cleaner.exe .
+.\dev-pc-cleaner.exe clean -apply
 ```
 
 ## Commands
@@ -40,6 +41,10 @@ go run . clean -apply
 - `-include-system`: Include system-level cache paths (default: true)
 - `-min-mb`: Filter items smaller than this size (MB)
 - `-min-files`: Filter items with fewer files than this count
+
+The built-in cache rules include AI coding assistant log locations for Codex, Claude Code, and Kiro while preserving session and project state directories.
+
+Runtime environment detection distinguishes Windows native, WSL, macOS, Linux, and other OS targets. Windows-specific WSL shrink instructions are shown only when running on Windows native.
 
 ## Clean Options
 - `-apply`: Apply destructive changes

@@ -1,6 +1,7 @@
 ﻿# Build
 /bin/
 /dist/
+/*.exe
 
 # OS
 .DS_Store

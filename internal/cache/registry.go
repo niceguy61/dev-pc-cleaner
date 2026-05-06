@@ -378,6 +378,23 @@ func Rules() []Rule {
 			"%APPDATA%\\Microsoft\\VisualStudio\\*\\Log",
 		),
 
+		// AI coding assistant logs (preserve sessions/projects/state)
+		rule("codex logs", "AI Tools", false, nil,
+			"%USERPROFILE%\\.codex\\log",
+			"%USERPROFILE%\\.codex\\*.log",
+			"%USERPROFILE%\\.codex\\logs_*.sqlite",
+			"%USERPROFILE%\\.codex\\logs_*.sqlite-shm",
+			"%USERPROFILE%\\.codex\\logs_*.sqlite-wal",
+		),
+		rule("claude code logs", "AI Tools", false, nil,
+			"%USERPROFILE%\\.claude\\debug",
+			"%USERPROFILE%\\.claude\\telemetry",
+			"%APPDATA%\\Claude\\logs",
+		),
+		rule("kiro logs", "AI Tools", false, nil,
+			"%APPDATA%\\Kiro\\logs",
+		),
+
 		// General logs (user-level)
 		rule("user temp", "Logs", false, nil,
 			"%TEMP%",
@@ -393,7 +410,7 @@ func Rules() []Rule {
 			"%LOCALAPPDATA%\\Microsoft\\Windows\\WER\\ReportQueue",
 			"%LOCALAPPDATA%\\Microsoft\\Windows\\WER\\ReportArchive",
 		),
-		rule("windows logs", "Logs", false, nil,
+		rule("windows logs", "Logs", true, nil,
 			"%WINDIR%\\Logs",
 		),
 
